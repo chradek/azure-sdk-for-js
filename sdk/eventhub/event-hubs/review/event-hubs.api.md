@@ -86,7 +86,6 @@ export interface EventHubProperties {
 // @public
 export interface EventIteratorOptions {
     cancellationToken?: Aborter;
-    prefetchCount?: number;
 }
 
 // @public
@@ -134,13 +133,13 @@ export interface PartitionProperties {
 // @public
 export interface ReceivedEventData {
     body: any;
-    enqueuedTimeUtc?: Date;
-    offset?: string;
-    partitionKey?: string | null;
+    enqueuedTimeUtc: Date;
+    offset: string;
+    partitionKey: string | null;
     properties?: {
         [key: string]: any;
     };
-    sequenceNumber?: number;
+    sequenceNumber: number;
 }
 
 // @public
