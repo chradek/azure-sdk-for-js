@@ -55,7 +55,7 @@ describe("EventHub Receiver", function(): void {
 
   describe("with partitionId 0 as number #RunnableInBrowser", function(): void {
     it("should work for receiveBatch", async function(): Promise<void> {
-      receiver = client.createReceiver(partitionIds[0], { beginReceivingAt: EventPosition.fromSequenceNumber(0) });
+      receiver = client.createReceiver(partitionIds[0], EventPosition.fromSequenceNumber(0));
       const result = await receiver.receiveBatch(10, 20);
       should.equal(true, Array.isArray(result));
     });
@@ -81,9 +81,8 @@ describe("EventHub Receiver", function(): void {
         }
       };
       rcvHandler = client
-        .createReceiver(partitionIds[0], {
-          exclusiveReceiverPriority: 1,
-          beginReceivingAt: EventPosition.fromOffset("0")
+        .createReceiver(partitionIds[0], EventPosition.fromOffset("0"), {
+          exclusiveReceiverPriority: 1
         })
         .receive(onMsg, onError);
     });
@@ -101,9 +100,7 @@ describe("EventHub Receiver", function(): void {
       }
       await client.createSender({ partitionId: partitionId }).send(events);
       debug("Creating new receiver with offset EndOfStream");
-      breceiver = BatchingReceiver.create((client as any)._context, partitionId, {
-        beginReceivingAt: EventPosition.fromNewEventsOnly()
-      });
+      breceiver = BatchingReceiver.create((client as any)._context, partitionId, EventPosition.latest());
       const data1 = await breceiver.receive(10, 10);
       data1.length.should.equal(0, "Unexpected message received when using EventPosition.fromEnd()");
       // send a new message. We should only receive this new message.
@@ -129,9 +126,11 @@ describe("EventHub Receiver", function(): void {
       const partitionId = partitionIds[0];
       const pInfo = await client.getPartitionInformation(partitionId);
       debug(`Creating new receiver with last enqueued offset: "${pInfo.lastEnqueuedOffset}".`);
-      breceiver = BatchingReceiver.create((client as any)._context, parseInt(partitionId), {
-        beginReceivingAt: EventPosition.fromOffset(pInfo.lastEnqueuedOffset)
-      });
+      breceiver = BatchingReceiver.create(
+        (client as any)._context,
+        parseInt(partitionId),
+        EventPosition.fromOffset(pInfo.lastEnqueuedOffset)
+      );
       debug("Establishing the receiver link...");
       const d = await breceiver.receive(10, 10);
       d.length.should.equal(0);
@@ -178,9 +177,11 @@ describe("EventHub Receiver", function(): void {
       await client.createSender({ partitionId: partitionId }).send([ed2]);
       debug(`Sent message 2 with stamp: ${uid} after getting the enqueued offset.`);
       debug(`Creating new receiver with last enqueued offset: "${pInfo.lastEnqueuedOffset}".`);
-      breceiver = BatchingReceiver.create((client as any)._context, partitionId, {
-        beginReceivingAt: EventPosition.fromOffset(pInfo.lastEnqueuedOffset, true)
-      });
+      breceiver = BatchingReceiver.create(
+        (client as any)._context,
+        partitionId,
+        EventPosition.fromOffset(pInfo.lastEnqueuedOffset, true)
+      );
       debug("We should receive the last 2 messages.");
       const data = await breceiver.receive(10, 30);
       debug("received messages: ", data);
@@ -196,9 +197,11 @@ describe("EventHub Receiver", function(): void {
       const partitionId = partitionIds[0];
       const pInfo = await client.getPartitionInformation(partitionId);
       debug(`Creating new receiver with last enqueued time: "${pInfo.lastEnqueuedTimeUtc}".`);
-      breceiver = BatchingReceiver.create((client as any)._context, partitionId, {
-        beginReceivingAt: EventPosition.fromEnqueuedTime(pInfo.lastEnqueuedTimeUtc)
-      });
+      breceiver = BatchingReceiver.create(
+        (client as any)._context,
+        partitionId,
+        EventPosition.fromEnqueuedTime(pInfo.lastEnqueuedTimeUtc)
+      );
       debug("Establishing the receiver link...");
       const d = await breceiver.receive(10, 10);
       d.length.should.equal(0, "Unexpected message received before sending any message");
@@ -221,7 +224,9 @@ describe("EventHub Receiver", function(): void {
       data2.length.should.equal(0, "Unexpected message received");
     });
 
-    it("'after the particular sequence number' should receive messages correctly #RunnableInBrowser", async function(): Promise<void> {
+    it("'after the particular sequence number' should receive messages correctly #RunnableInBrowser", async function(): Promise<
+      void
+    > {
       const partitionId = partitionIds[0];
       const pInfo = await client.getPartitionInformation(partitionId);
       // send a new message. We should only receive this new message.
@@ -237,9 +242,11 @@ describe("EventHub Receiver", function(): void {
         "Sent the new message after getting the partition runtime information. We should only receive this message."
       );
       debug(`Creating new receiver with last enqueued sequence number: "${pInfo.lastEnqueuedSequenceNumber}".`);
-      breceiver = BatchingReceiver.create((client as any)._context, partitionId, {
-        beginReceivingAt: EventPosition.fromSequenceNumber(pInfo.lastEnqueuedSequenceNumber)
-      });
+      breceiver = BatchingReceiver.create(
+        (client as any)._context,
+        partitionId,
+        EventPosition.fromSequenceNumber(pInfo.lastEnqueuedSequenceNumber)
+      );
       const data = await breceiver.receive(10, 20);
       debug("received messages: ", data);
       data.length.should.equal(1, "Failed to receive the expected single message");
@@ -273,9 +280,11 @@ describe("EventHub Receiver", function(): void {
       await client.createSender({ partitionId: partitionId }).send([ed2]);
       debug(`Sent message 2 with stamp: ${uid}.`);
       debug(`Creating new receiver with last sequence number: "${pInfo.lastEnqueuedSequenceNumber}".`);
-      breceiver = BatchingReceiver.create((client as any)._context, partitionId, {
-        beginReceivingAt: EventPosition.fromSequenceNumber(pInfo.lastEnqueuedSequenceNumber, true)
-      });
+      breceiver = BatchingReceiver.create(
+        (client as any)._context,
+        partitionId,
+        EventPosition.fromSequenceNumber(pInfo.lastEnqueuedSequenceNumber, true)
+      );
       debug("We should receive the last 2 messages.");
       const data = await breceiver.receive(10, 30);
       debug("received messages: ", data);
@@ -291,7 +300,7 @@ describe("EventHub Receiver", function(): void {
   describe("in batch mode #RunnableInBrowser", function(): void {
     it("should receive messages correctly", async function(): Promise<void> {
       const partitionId = partitionIds[0];
-      receiver = client.createReceiver(partitionId);
+      receiver = client.createReceiver(partitionId, EventPosition.earliest());
       const data = await receiver.receiveBatch(5, 10);
       debug("received messages: ", data);
       data.length.should.equal(5, "Failed to receive five expected messages");
@@ -319,9 +328,7 @@ describe("EventHub Receiver", function(): void {
         await sender.close();
       }
 
-      receiver = client.createReceiver(partitionId, {
-        beginReceivingAt: EventPosition.fromEnqueuedTime(time)
-      });
+      receiver = client.createReceiver(partitionId, EventPosition.fromEnqueuedTime(time));
       const eventIterator = receiver.getEventIterator();
 
       let messagesReceivedCount = 0;
@@ -362,9 +369,7 @@ describe("EventHub Receiver", function(): void {
         }
 
         const data: ReceivedEventData[] = [];
-        receiver = client.createReceiver(partitionId, {
-          beginReceivingAt: EventPosition.fromEnqueuedTime(time)
-        });
+        receiver = client.createReceiver(partitionId, EventPosition.fromEnqueuedTime(time));
 
         // start with iterator
         for await (const event of receiver.getEventIterator()) {
@@ -462,9 +467,8 @@ describe("EventHub Receiver", function(): void {
         debug(">>>> epoch Receiver 1", data);
       };
       epochRcvr1 = client
-        .createReceiver(partitionId, {
-          exclusiveReceiverPriority: 2,
-          beginReceivingAt: EventPosition.fromNewEventsOnly()
+        .createReceiver(partitionId, EventPosition.latest(), {
+          exclusiveReceiverPriority: 2
         })
         .receive(onMsg, onError);
       debug("Created epoch receiver 1 %s", epochRcvr1);
@@ -489,9 +493,8 @@ describe("EventHub Receiver", function(): void {
           debug(">>>> epoch Receiver 2", data);
         };
         epochRcvr2 = client
-          .createReceiver(partitionId, {
-            exclusiveReceiverPriority: 1,
-            beginReceivingAt: EventPosition.fromNewEventsOnly()
+          .createReceiver(partitionId, EventPosition.latest(), {
+            exclusiveReceiverPriority: 1
           })
           .receive(onMsg2, onError2);
         debug("Created epoch receiver 2 %s", epochRcvr2);
@@ -522,9 +525,8 @@ describe("EventHub Receiver", function(): void {
         debug(">>>> epoch Receiver 1", data);
       };
       epochRcvr1 = client
-        .createReceiver(partitionId, {
-          exclusiveReceiverPriority: 1,
-          beginReceivingAt: EventPosition.fromNewEventsOnly()
+        .createReceiver(partitionId, EventPosition.latest(), {
+          exclusiveReceiverPriority: 1
         })
         .receive(onMsg, onError);
       debug("Created epoch receiver 1 %s", epochRcvr1);
@@ -537,9 +539,8 @@ describe("EventHub Receiver", function(): void {
           debug(">>>> epoch Receiver 2", data);
         };
         epochRcvr2 = client
-          .createReceiver(partitionId, {
-            exclusiveReceiverPriority: 2,
-            beginReceivingAt: EventPosition.fromNewEventsOnly()
+          .createReceiver(partitionId, EventPosition.latest(), {
+            exclusiveReceiverPriority: 2
           })
           .receive(onMsg2, onError2);
         debug("Created epoch receiver 2 %s", epochRcvr2);
@@ -558,9 +559,8 @@ describe("EventHub Receiver", function(): void {
         debug(">>>> epoch Receiver ", data);
       };
       epochRcvr = client
-        .createReceiver(partitionId, {
-          exclusiveReceiverPriority: 1,
-          beginReceivingAt: EventPosition.fromNewEventsOnly()
+        .createReceiver(partitionId, EventPosition.latest(), {
+          exclusiveReceiverPriority: 1
         })
         .receive(onmsg1, onerr1);
       debug("Created epoch receiver %s", epochRcvr);
@@ -583,11 +583,7 @@ describe("EventHub Receiver", function(): void {
       const onmsg2 = (data: ReceivedEventData) => {
         debug(">>>> non epoch Receiver", data);
       };
-      nonEpochRcvr = client
-        .createReceiver(partitionId, {
-          beginReceivingAt: EventPosition.fromNewEventsOnly()
-        })
-        .receive(onmsg2, onerr2);
+      nonEpochRcvr = client.createReceiver(partitionId, EventPosition.latest()).receive(onmsg2, onerr2);
       debug("Created non epoch receiver %s", nonEpochRcvr);
     });
 
@@ -614,11 +610,7 @@ describe("EventHub Receiver", function(): void {
       const onmsg3 = (data: ReceivedEventData) => {
         debug(">>>> non epoch Receiver", data);
       };
-      nonEpochRcvr = client
-        .createReceiver(partitionId, {
-          beginReceivingAt: EventPosition.fromNewEventsOnly()
-        })
-        .receive(onmsg3, onerr3);
+      nonEpochRcvr = client.createReceiver(partitionId, EventPosition.latest()).receive(onmsg3, onerr3);
       debug("Created non epoch receiver %s", nonEpochRcvr);
       setTimeout(() => {
         const onerr4 = (error: MessagingError | Error) => {
@@ -629,9 +621,8 @@ describe("EventHub Receiver", function(): void {
           debug(">>>> epoch Receiver ", data);
         };
         epochRcvr = client
-          .createReceiver(partitionId, {
-            exclusiveReceiverPriority: 1,
-            beginReceivingAt: EventPosition.fromNewEventsOnly()
+          .createReceiver(partitionId, EventPosition.latest(), {
+            exclusiveReceiverPriority: 1
           })
           .receive(onmsg4, onerr4);
         debug("Created epoch receiver %s", epochRcvr);
@@ -646,7 +637,7 @@ describe("EventHub Receiver", function(): void {
         it(`"${id}" should throw an error`, async function(): Promise<void> {
           try {
             debug("Created receiver and will be receiving messages from partition id ...", id);
-            const d = await client.createReceiver(id).receiveBatch(10, 3);
+            const d = await client.createReceiver(id, EventPosition.latest()).receiveBatch(10, 3);
             debug("received messages ", d.length);
           } catch (err) {
             debug("Receiver received an error", err);
@@ -662,7 +653,7 @@ describe("EventHub Receiver", function(): void {
         try {
           const id = " ";
           debug("Created receiver and will be receiving messages from partition id ...", id);
-          const d = await client.createReceiver(id).receiveBatch(10, 3);
+          const d = await client.createReceiver(id, EventPosition.latest()).receiveBatch(10, 3);
           debug("received messages ", d.length);
         } catch (err) {
           debug("Receiver received an error", err);
@@ -675,7 +666,7 @@ describe("EventHub Receiver", function(): void {
       invalidIds2.forEach(function(id: string): void {
         it(`"${id}" should throw an error`, async function(): Promise<void> {
           try {
-            await client.createReceiver(id).receiveBatch(10, 3);
+            await client.createReceiver(id, EventPosition.latest()).receiveBatch(10, 3);
           } catch (err) {
             debug(`>>>> Received error - `, err);
             should.exist(err);
@@ -693,7 +684,7 @@ describe("EventHub Receiver", function(): void {
       // onerr2() to be called with QuotaExceededError.  So it's fastest to use EventPosition.fromEnd().
       // Using EventPosition.fromStart() can cause timeouts or ServiceUnavailableException if the EventHub has
       // a large number of messages.
-      const eventPosition = EventPosition.fromNewEventsOnly();
+      const eventPosition = EventPosition.latest();
 
       debug(">>> Receivers length: ", rcvHndlrs.length);
       for (let i = 1; i <= 5; i++) {
@@ -709,9 +700,7 @@ describe("EventHub Receiver", function(): void {
           debug("@@@@ Error received by receiver %s", rcvrId);
           debug(err);
         };
-        const rcvHndlr = client
-          .createReceiver(partitionId, { beginReceivingAt: eventPosition })
-          .receive(onMsg, onError);
+        const rcvHndlr = client.createReceiver(partitionId, eventPosition).receive(onMsg, onError);
         rcvHndlrs.push(rcvHndlr);
       }
       debug(">>> Attached message handlers to each receiver.");
@@ -738,9 +727,7 @@ describe("EventHub Receiver", function(): void {
               done();
             });
         };
-        const failedRcvHandler = client
-          .createReceiver(partitionId, { beginReceivingAt: eventPosition })
-          .receive(onmsg2, onerr2);
+        const failedRcvHandler = client.createReceiver(partitionId, eventPosition).receive(onmsg2, onerr2);
         rcvHndlrs.push(failedRcvHandler);
       }, 5000);
     });
