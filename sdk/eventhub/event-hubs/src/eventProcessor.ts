@@ -134,10 +134,36 @@ export interface PartitionManager {
   updateCheckpoint(checkpoint: Checkpoint): Promise<void>;
 }
 
+/**
+ * Error handler that can be provided to receive notitifications for general errors.
+ * This handler is called on occasions when an error occurs while managing partitions or
+ * ownership for the partitions.
+ */
+export type EventProcessorErrorHandler = (error: Error) => void;
+
 // Options passed when creating EventProcessor, everything is optional
 export interface EventProcessorOptions {
+  /**
+   * Error handler that can be provided to receive notitifications for general errors.
+   * This handler is called on occasions when an error occurs while managing partitions or
+   * ownership for the partitions.
+   */
+  errorHandler?: EventProcessorErrorHandler;
+  /**
+   * The event position to use if there is no checkpoint data obtained by the `PartitionManager` for
+   * a partition.
+   */
   initialEventPosition?: EventPosition;
+  /**
+   * The maximum number of messages to receive in a single `PartitionProcessor` `processEvents` invocation.
+   * Must be a value greater than 0.
+   * Defaults to 1.
+   */
   maxBatchSize?: number;
+  /**
+   * The maximum amount of time to wait to build up the requested message count for the batch.
+   * If not provided, it defaults to 60 seconds.
+   */
   maxWaitTimeInSeconds?: number;
 }
 
@@ -172,6 +198,40 @@ export class EventProcessor {
     this._pumpManager = new PumpManager(this._id, options);
   }
 
+  private _notifyUserErrorHandler(error: Error) {
+    try {
+      if (typeof this._processorOptions.errorHandler === "function") {
+        this._processorOptions.errorHandler(error);
+      }
+    } catch (err) {
+      // swallow errors from user's error handler
+      log.error(
+        `[${this._id}] An error occured when invoking the user-provided EventProcessor error handler: ${err}`
+      );
+    }
+  }
+
+  private _validatePartitionProcessor(partitionProcessor: PartitionProcessor): void {
+    if (partitionProcessor.close && typeof partitionProcessor.close !== "function") {
+      throw new TypeError("'PartitionProcessor.close' must be 'undefined' or of type 'function'.");
+    }
+    if (partitionProcessor.initialize && typeof partitionProcessor.initialize !== "function") {
+      throw new TypeError(
+        "'PartitionProcessor.initialize' must be 'undefined' or of type 'function'."
+      );
+    }
+    if (typeof partitionProcessor.processError !== "function") {
+      throw new TypeError(
+        "'PartitionProcessor.processError' must be defined and of type 'function'."
+      );
+    }
+    if (typeof partitionProcessor.processEvents !== "function") {
+      throw new TypeError(
+        "'PartitionProcessor.processEvents' must be defined and of type 'function'."
+      );
+    }
+  }
+
   private async _getInactivePartitions(): Promise<string[]> {
     try {
       // get all partition ids on the event hub
@@ -186,6 +246,7 @@ export class EventProcessor {
       return inactivePartitionIds;
     } catch (err) {
       log.error(`[${this._id}] An error occured when retrieving partition ids: ${err}`);
+      this._notifyUserErrorHandler(err);
       throw err;
     }
   }
@@ -226,17 +287,34 @@ export class EventProcessor {
             checkpointManager
           );
 
+          // validate the partition processor
+          try {
+            this._validatePartitionProcessor(partitionProcessor);
+          } catch (err) {
+            this._notifyUserErrorHandler(err);
+            // it's unlikely a partition processor would be created incorrectly just sometimes,
+            // so exit the loop early.
+            try {
+              await this._pumpManager.removeAllPumps(CloseReason.Unknown);
+            } catch (err) {
+              log.error(`[${this._id}] An error occured while removing all pumps: ${err}`);
+            }
+            this._isRunning = false;
+            return;
+          }
+
           // eventually this will 1st check if the existing PartitionOwnership has a position
           const eventPosition =
             this._processorOptions.initialEventPosition || EventPosition.earliest();
 
           tasks.push(
-            this._pumpManager.createPump(
-              this._eventHubClient,
-              partitionContext,
-              eventPosition,
-              partitionProcessor
-            )
+            this._pumpManager
+              .createPump(this._eventHubClient, partitionContext, eventPosition, partitionProcessor)
+              .catch((err) => {
+                // notify the user if a pump couldn't be created
+                this._notifyUserErrorHandler(err);
+                throw err;
+              })
           );
         }
 
@@ -256,6 +334,15 @@ export class EventProcessor {
 
     // loop has completed, remove all existing pumps
     return this._pumpManager.removeAllPumps(CloseReason.Shutdown);
+  }
+
+  /**
+   * Indicates whether the `EventProcessor` is actively running.
+   *
+   * @return {boolean}
+   */
+  get isRunning(): boolean {
+    return this._isRunning;
   }
 
   /**

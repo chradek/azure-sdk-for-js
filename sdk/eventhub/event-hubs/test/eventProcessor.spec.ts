@@ -247,6 +247,50 @@ describe("Event Processor", function(): void {
   });
 
   describe("Partition processor", function(): void {
+    it("validation failure should stop the EventProcessor", async function(): Promise<void> {
+      let didPartitionProcessorStart = false;
+      let didError = false;
+
+      // The partitionProcess will need to add events to the partitionResultsMap as they are received
+      const factory: PartitionProcessorFactory = (context) => {
+        return {
+          // intentionally misspelled method name
+          async processEvent() {
+            didPartitionProcessorStart = true;
+          },
+          async processError() {
+            didPartitionProcessorStart = true;
+          }
+        } as any;
+      };
+
+      const processor = new EventProcessor(
+        EventHubClient.defaultConsumerGroupName,
+        client,
+        factory,
+        undefined as any,
+        {
+          initialEventPosition: EventPosition.fromEnqueuedTime(new Date()),
+          maxWaitTimeInSeconds: 5,
+          errorHandler: (err) => {
+            err.name.should.equal("TypeError");
+            didError = true;
+          }
+        }
+      );
+
+      processor.start();
+
+      // isRunning should be true until the partition processor validation fails
+      processor.isRunning.should.be.true;
+
+      await delay(1000);
+
+      didError.should.be.true;
+      processor.isRunning.should.be.false;
+      didPartitionProcessorStart.should.be.false;
+    });
+
     it("should support processing events across multiple partitions", async function(): Promise<
       void
     > {
@@ -437,7 +481,9 @@ describe("Event Processor", function(): void {
   });
 
   describe("InMemory Partition Manager", function(): void {
-    it("should claim ownership, get a list of ownership and update checkpoint", async function(): Promise<void> {
+    it("should claim ownership, get a list of ownership and update checkpoint", async function(): Promise<
+      void
+    > {
       const inMemoryPartitionManager = new InMemoryPartitionManager();
       const partitionOwnership1: PartitionOwnership = {
         eventHubName: "myEventHub",
@@ -458,13 +504,13 @@ describe("Event Processor", function(): void {
         partitionOwnership2
       ]);
       partitionOwnership.length.should.equals(2);
-   
+
       const ownershipslist = await inMemoryPartitionManager.listOwnerships(
         "myEventHub",
         EventHubClient.defaultConsumerGroupName
       );
       ownershipslist.length.should.equals(2);
-    
+
       const checkpoint: Checkpoint = {
         eventHubName: "myEventHub",
         consumerGroupName: EventHubClient.defaultConsumerGroupName,
