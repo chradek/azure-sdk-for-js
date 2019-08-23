@@ -196,7 +196,7 @@ export type PartitionErrorHandler = (
  * You need the below to create an instance of `EventProcessor`
  * - The name of the consumer group from which you want to process events
  * - An instance of `EventHubClient` that was created for the Event Hub instance.
- * - A factory method that can return an object that implements the `PartitionProcessor` interface.
+ * - A user-defined function that accepts events, `PartitionContext`, and a `CheckpointManager` to process events.
  * - An instance of `PartitionManager`. To get started, you can pass an instance of `InMemoryPartitionManager`.
  * For production, choose an implementation that will store checkpoints and partition ownership details to a durable store.
  *
