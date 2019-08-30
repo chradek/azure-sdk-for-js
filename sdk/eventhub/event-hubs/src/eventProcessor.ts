@@ -152,6 +152,7 @@ export interface EventProcessorOptions {
  * - A user implemented class that extends the `PartitionProcessor` class. To get started, you can use the
  * base class `PartitionProcessor` which simply logs the incoming events. To provide your code to process incoming
  * events, extend this class and override the `processEvents()` method. For example:
+ * ```
  * class SamplePartitionProcessor extends PartitionProcessor {
  *     processEvents: (events) => {
  *        // user code to process events here
