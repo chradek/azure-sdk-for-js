@@ -8,7 +8,6 @@ chai.use(chaiAsPromised);
 import debugModule from "debug";
 const debug = debugModule("azure:event-hubs:partitionPump");
 import {
-  EventPosition,
   EventHubClient,
   EventData,
   EventProcessor,
@@ -50,10 +49,7 @@ describe.only("Event Processor", function (): void {
       EventHubClient.defaultConsumerGroupName,
       client,
       PartitionProcessor,
-      new InMemoryPartitionManager(),
-      {
-        initialEventPosition: EventPosition.fromEnqueuedTime(new Date())
-      }
+      new InMemoryPartitionManager()
     );
 
     const id = processor.id;
@@ -84,12 +80,13 @@ describe.only("Event Processor", function (): void {
         partitionResultsMap.get(this.context.partitionId)!.closeReason = reason;
       }
 
-      async processEvents(events: ReceivedEventData[]) {
-        const partitionId = this.context.partitionId;
-        partitionOwnerShip.add(partitionId);
-        const existingEvents = partitionResultsMap.get(partitionId)!.events;
-        events.forEach((event) => existingEvents.push(event.body));
-      }
+      // async processEvents(events: ReceivedEventData[]) {
+
+      //   const partitionId = this.context.partitionId;
+      //   partitionOwnerShip.add(partitionId);
+      //   const existingEvents = partitionResultsMap.get(partitionId)!.events;
+      //   events.forEach((event) => existingEvents.push(event.body));
+      // }
 
       async processError(error: Error) {
         didError = true;
@@ -100,10 +97,7 @@ describe.only("Event Processor", function (): void {
       EventHubClient.defaultConsumerGroupName,
       client,
       TestPartitionProcessor,
-      new InMemoryPartitionManager(),
-      {
-        initialEventPosition: EventPosition.fromEnqueuedTime(new Date())
-      }
+      new InMemoryPartitionManager()
     );
 
     processor.start();
@@ -162,10 +156,7 @@ describe.only("Event Processor", function (): void {
       EventHubClient.defaultConsumerGroupName,
       client,
       TestPartitionProcessor,
-      new InMemoryPartitionManager(),
-      {
-        initialEventPosition: EventPosition.fromEnqueuedTime(new Date())
-      }
+      new InMemoryPartitionManager()
     );
 
     // shutdown the processor
@@ -210,10 +201,7 @@ describe.only("Event Processor", function (): void {
       EventHubClient.defaultConsumerGroupName,
       client,
       TestPartitionProcessor,
-      new InMemoryPartitionManager(),
-      {
-        initialEventPosition: EventPosition.fromEnqueuedTime(new Date())
-      }
+      new InMemoryPartitionManager()
     );
 
     processor.start();
@@ -310,10 +298,7 @@ describe.only("Event Processor", function (): void {
         EventHubClient.defaultConsumerGroupName,
         client,
         TestPartitionProcessor,
-        new InMemoryPartitionManager(),
-        {
-          initialEventPosition: EventPosition.fromEnqueuedTime(new Date())
-        }
+        new InMemoryPartitionManager()
       );
 
       processor.start();
@@ -375,10 +360,7 @@ describe.only("Event Processor", function (): void {
         EventHubClient.defaultConsumerGroupName,
         client,
         TestPartitionProcessor,
-        new InMemoryPartitionManager(),
-        {
-          initialEventPosition: EventPosition.fromEnqueuedTime(new Date())
-        }
+        new InMemoryPartitionManager()
       );
 
       processor.start();
@@ -440,10 +422,7 @@ describe.only("Event Processor", function (): void {
         EventHubClient.defaultConsumerGroupName,
         client,
         SimpleEventProcessor,
-        new InMemoryPartitionManager(),
-        {
-          initialEventPosition: EventPosition.fromEnqueuedTime(new Date())
-        }
+        new InMemoryPartitionManager()
       );
       processor.start();
 
@@ -551,10 +530,7 @@ describe.only("Event Processor", function (): void {
         EventHubClient.defaultConsumerGroupName,
         client,
         TestPartitionProcessor,
-        inMemoryPartitionManager,
-        {
-          initialEventPosition: EventPosition.fromEnqueuedTime(new Date())
-        }
+        inMemoryPartitionManager
       );
 
       // start first processor
@@ -644,7 +620,6 @@ describe.only("Event Processor", function (): void {
     it("should 'steal' partitions until all the  processors have reached a steady-state", async function (): Promise<
       void
     > {
-      const now = Date.now();
       const processorByName: Dictionary<EventProcessor> = {};
       const partitionManager = new InMemoryPartitionManager();
       const partitionIds = await client.getPartitionIds();
@@ -691,10 +666,7 @@ describe.only("Event Processor", function (): void {
         EventHubClient.defaultConsumerGroupName,
         client,
         TestPartitionProcessor,
-        partitionManager,
-        {
-          initialEventPosition: EventPosition.fromEnqueuedTime(now)
-        }
+        partitionManager
       );
 
       processorByName[`processor-1`].start();
@@ -707,10 +679,7 @@ describe.only("Event Processor", function (): void {
         EventHubClient.defaultConsumerGroupName,
         client,
         TestPartitionProcessor,
-        partitionManager,
-        {
-          initialEventPosition: EventPosition.fromEnqueuedTime(now)
-        }
+        partitionManager
       );
 
       partitionOwnershipArr.size.should.equal(partitionIds.length);
@@ -758,7 +727,6 @@ describe.only("Event Processor", function (): void {
     it("should ensure that all the processors reach a steady-state where all partitions are being processed", async function (): Promise<
       void
     > {
-      const now = Date.now();
       const processorByName: Dictionary<EventProcessor> = {};
       const partitionIds = await client.getPartitionIds();
       const partitionManager = new InMemoryPartitionManager();
@@ -789,10 +757,7 @@ describe.only("Event Processor", function (): void {
           EventHubClient.defaultConsumerGroupName,
           client,
           TestPartitionProcessor,
-          partitionManager,
-          {
-            initialEventPosition: EventPosition.fromEnqueuedTime(now)
-          }
+          partitionManager
         );
         processorByName[processorName].start();
         await delay(12000);
