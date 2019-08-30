@@ -51,8 +51,8 @@ export interface EventIteratorOptions {
  * then specify the `ownerLevel` in the `options`.
  * Exclusive consumers were previously referred to as "Epoch Receivers".
  *
- * The consumer can be used to receive messages in a batch using `receiveBatch()` or by registering handlers 
- * by using `receive()` or via an async iterable got by using `getEventIterator()`
+ * The consumer can be used to receive messages in a batch using `receiveEvents()` or by registering handlers 
+ * by using `receiveWithCallbacks()` or via an async iterable got by using `getEventIterator()`
  * @class
  */
 export class EventHubConsumer {
@@ -125,7 +125,7 @@ export class EventHubConsumer {
 
   /**
    * Indicates whether the consumer is currently receiving messages or not.
-   * When this returns true, new `receive()` or `receiveBatch()` calls cannot be made.
+   * When this returns true, new `receiveWithCallbacks()` or `receiveEvents()` calls cannot be made.
    */
   get isReceivingMessages(): boolean {
     return Boolean(this._baseConsumer && this._baseConsumer.isReceivingMessages);
@@ -174,7 +174,7 @@ export class EventHubConsumer {
    * Create a new EventHubConsumer using the EventHubClient createConsumer method.
    * @throws {Error} Thrown if the receiver is already receiving messages.
    */
-  receive(onMessage: OnMessage, onError: OnError, abortSignal?: AbortSignalLike): ReceiveHandler {
+  receiveWithCallbacks(onMessage: OnMessage, onError: OnError, abortSignal?: AbortSignalLike): ReceiveHandler {
     this._throwIfReceiverOrConnectionClosed();
     this._throwIfAlreadyReceiving();
     const baseConsumer = this._baseConsumer!;
@@ -190,7 +190,7 @@ export class EventHubConsumer {
     if (abortSignal && abortSignal.aborted) {
       onError(new AbortError("The receive operation has been cancelled by the user."));
       // close this receiver when user triggers a cancellation.
-      this.close().catch(() => {}); // no-op close error handler
+      this.close().catch(() => { }); // no-op close error handler
       return new ReceiveHandler(baseConsumer);
     }
 
@@ -207,7 +207,7 @@ export class EventHubConsumer {
 
       if (error.name === "AbortError") {
         // close this receiver when user triggers a cancellation.
-        this.close().catch(() => {}); // no-op close error handler
+        this.close().catch(() => { }); // no-op close error handler
       }
       onError(error);
     };
@@ -247,7 +247,7 @@ export class EventHubConsumer {
     const maxWaitTimeInSeconds = Constants.defaultOperationTimeoutInMs / 1000;
 
     while (true) {
-      const currentBatch = await this.receiveBatch(
+      const currentBatch = await this.receiveEvents(
         maxMessageCount,
         maxWaitTimeInSeconds,
         options.abortSignal
@@ -275,7 +275,7 @@ export class EventHubConsumer {
    * Create a new EventHubConsumer using the EventHubClient createConsumer method.
    * @throws {Error} Thrown if the receiver is already receiving messages.
    */
-  async receiveBatch(
+  async receiveEvents(
     maxMessageCount: number,
     maxWaitTimeInSeconds: number = 60,
     abortSignal?: AbortSignalLike

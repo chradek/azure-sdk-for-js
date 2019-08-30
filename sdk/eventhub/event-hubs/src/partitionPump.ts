@@ -61,7 +61,7 @@ export class PartitionPump {
 
     while (this._isReceiving) {
       try {
-        const receivedEvents = await this._receiver.receiveBatch(
+        const receivedEvents = await this._receiver.receiveEvents(
           this._processorOptions.maxBatchSize || 1,
           this._processorOptions.maxWaitTimeInSeconds,
           this._abortController.signal

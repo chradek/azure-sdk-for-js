@@ -159,6 +159,7 @@ export interface EventProcessorOptions {
  *        // use `this.updateCheckpoint()` method to update checkpoints as needed
  *     }
  * }
+ * ```
  * - An instance of `PartitionManager`. To get started, you can pass an instance of `InMemoryPartitionManager`.
  * For production, choose an implementation that will store checkpoints and partition ownership details to a durable store.
  *

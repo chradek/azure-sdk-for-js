@@ -19,7 +19,7 @@ import {
 import { EnvVarKeys, getEnvVars } from "./utils/testUtils";
 const env = getEnvVars();
 
-describe("Misc tests #RunnableInBrowser", function(): void {
+describe("Misc tests #RunnableInBrowser", function (): void {
   const service = {
     connectionString: env[EnvVarKeys.EVENTHUB_CONNECTION_STRING],
     path: env[EnvVarKeys.EVENTHUB_NAME]
@@ -27,7 +27,7 @@ describe("Misc tests #RunnableInBrowser", function(): void {
   const client: EventHubClient = new EventHubClient(service.connectionString, service.path);
   let receiver: EventHubConsumer;
   let hubInfo: EventHubProperties;
-  before("validate environment", async function(): Promise<void> {
+  before("validate environment", async function (): Promise<void> {
     should.exist(
       env[EnvVarKeys.EVENTHUB_CONNECTION_STRING],
       "define EVENTHUB_CONNECTION_STRING in your environment before running integration tests."
@@ -39,11 +39,11 @@ describe("Misc tests #RunnableInBrowser", function(): void {
     hubInfo = await client.getProperties();
   });
 
-  after("close the connection", async function(): Promise<void> {
+  after("close the connection", async function (): Promise<void> {
     await client.close();
   });
 
-  it("should be able to send and receive a large message correctly", async function(): Promise<
+  it("should be able to send and receive a large message correctly", async function (): Promise<
     void
   > {
     const bodysize = 220 * 1024;
@@ -59,12 +59,12 @@ describe("Misc tests #RunnableInBrowser", function(): void {
       partitionId,
       EventPosition.fromOffset(offset)
     );
-    let data = await receiver.receiveBatch(5, 10);
+    let data = await receiver.receiveEvents(5, 10);
     should.equal(data.length, 0, "Unexpected to receive message before client sends it");
     const sender = client.createProducer({ partitionId });
     await sender.send([obj]);
     debug("Successfully sent the large message.");
-    data = await receiver.receiveBatch(5, 30);
+    data = await receiver.receiveEvents(5, 30);
     debug("Closing the receiver..");
     await receiver.close();
     debug("received message: ", data.length);
@@ -74,7 +74,7 @@ describe("Misc tests #RunnableInBrowser", function(): void {
     should.not.exist((data[0].properties || {}).message_id);
   });
 
-  it("should be able to send and receive a JSON object as a message correctly", async function(): Promise<
+  it("should be able to send and receive a JSON object as a message correctly", async function (): Promise<
     void
   > {
     const partitionId = hubInfo.partitionIds[0];
@@ -102,7 +102,7 @@ describe("Misc tests #RunnableInBrowser", function(): void {
     const sender = client.createProducer({ partitionId });
     await sender.send([obj]);
     debug("Successfully sent the large message.");
-    const data = await receiver.receiveBatch(5, 30);
+    const data = await receiver.receiveEvents(5, 30);
     await receiver.close();
     debug("received message: ", data);
     should.exist(data);
@@ -112,7 +112,7 @@ describe("Misc tests #RunnableInBrowser", function(): void {
     should.not.exist((data[0].properties || {}).message_id);
   });
 
-  it("should be able to send and receive an array as a message correctly", async function(): Promise<
+  it("should be able to send and receive an array as a message correctly", async function (): Promise<
     void
   > {
     const partitionId = hubInfo.partitionIds[0];
@@ -138,7 +138,7 @@ describe("Misc tests #RunnableInBrowser", function(): void {
     const sender = client.createProducer({ partitionId });
     await sender.send([obj]);
     debug("Successfully sent the large message.");
-    const data = await receiver.receiveBatch(5, 30);
+    const data = await receiver.receiveEvents(5, 30);
     await receiver.close();
     debug("received message: ", data);
     should.exist(data);
@@ -148,7 +148,7 @@ describe("Misc tests #RunnableInBrowser", function(): void {
     assert.strictEqual(data[0].properties!.message_id, obj.properties!.message_id);
   });
 
-  it("should be able to send a boolean as a message correctly", async function(): Promise<void> {
+  it("should be able to send a boolean as a message correctly", async function (): Promise<void> {
     const partitionId = hubInfo.partitionIds[0];
     const msgBody = true;
     const obj: EventData = { body: msgBody };
@@ -163,7 +163,7 @@ describe("Misc tests #RunnableInBrowser", function(): void {
     const sender = client.createProducer({ partitionId });
     await sender.send([obj]);
     debug("Successfully sent the large message.");
-    const data = await receiver.receiveBatch(5, 30);
+    const data = await receiver.receiveEvents(5, 30);
     await receiver.close();
     debug("received message: ", data);
     should.exist(data);
@@ -173,7 +173,7 @@ describe("Misc tests #RunnableInBrowser", function(): void {
     should.not.exist((data[0].properties || {}).message_id);
   });
 
-  it("should be able to send and receive batched messages correctly ", async function(): Promise<
+  it("should be able to send and receive batched messages correctly ", async function (): Promise<
     void
   > {
     try {
@@ -196,7 +196,7 @@ describe("Misc tests #RunnableInBrowser", function(): void {
         partitionId,
         EventPosition.fromOffset(offset)
       );
-      const data = await receiver.receiveBatch(5, 30);
+      const data = await receiver.receiveEvents(5, 30);
       await receiver.close();
       debug("received message: ", data);
       should.exist(data);
@@ -210,7 +210,7 @@ describe("Misc tests #RunnableInBrowser", function(): void {
     }
   });
 
-  it("should be able to send and receive batched messages as JSON objects correctly ", async function(): Promise<
+  it("should be able to send and receive batched messages as JSON objects correctly ", async function (): Promise<
     void
   > {
     try {
@@ -250,7 +250,7 @@ describe("Misc tests #RunnableInBrowser", function(): void {
         partitionId,
         EventPosition.fromOffset(offset)
       );
-      const data = await receiver.receiveBatch(5, 30);
+      const data = await receiver.receiveEvents(5, 30);
       await receiver.close();
       debug("received message: ", data);
       should.exist(data);
@@ -265,7 +265,7 @@ describe("Misc tests #RunnableInBrowser", function(): void {
     }
   });
 
-  it("should consistently send messages with partitionkey to a partitionId", async function(): Promise<
+  it("should consistently send messages with partitionkey to a partitionId", async function (): Promise<
     void
   > {
     const msgToSendCount = 50;
@@ -297,7 +297,7 @@ describe("Misc tests #RunnableInBrowser", function(): void {
         id,
         EventPosition.fromOffset(partitionOffsets[id])
       );
-      const data = await receiver.receiveBatch(50, 10);
+      const data = await receiver.receiveEvents(50, 10);
       await receiver.close();
       debug(`Received ${data.length} messages from partition ${id}.`);
       for (const d of data) {
