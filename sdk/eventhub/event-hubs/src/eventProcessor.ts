@@ -152,6 +152,7 @@ export interface EventProcessorOptions {
  * - A user implemented class that extends the `PartitionProcessor` class. To get started, you can use the
  * base class `PartitionProcessor` which simply logs the incoming events. To provide your code to process incoming
  * events, extend this class and override the `processEvents()` method. For example:
+ * ```
  * class SamplePartitionProcessor extends PartitionProcessor {
  *     processEvents: (events) => {
  *        // user code to process events here
@@ -159,6 +160,7 @@ export interface EventProcessorOptions {
  *        // use `this.updateCheckpoint()` method to update checkpoints as needed
  *     }
  * }
+ * ```
  * - An instance of `PartitionManager`. To get started, you can pass an instance of `InMemoryPartitionManager`.
  * For production, choose an implementation that will store checkpoints and partition ownership details to a durable store.
  *
@@ -204,7 +206,7 @@ export class EventProcessor {
     this._partitionProcessorClass = partitionProcessorClass;
     this._partitionManager = partitionManager;
     this._processorOptions = options;
-    this._pumpManager = new PumpManager(this._id, options);
+    this._pumpManager = new PumpManager(this._id, this._processorOptions);
     const inactiveTimeLimitInMS = 60000; // ownership expiration time (1 mintue)
     this._partitionLoadBalancer = new PartitionLoadBalancer(this._id, inactiveTimeLimitInMS);
   }

@@ -11,24 +11,24 @@ import { EventHubClient, EventPosition } from "../src";
 import { EnvVarKeys, getEnvVars } from "./utils/testUtils";
 const env = getEnvVars();
 
-describe("EventHub Client with iothub connection string ", function(): void {
+describe("EventHub Client with iothub connection string ", function (): void {
   const service = { connectionString: env[EnvVarKeys.IOTHUB_CONNECTION_STRING] };
   let client: EventHubClient;
-  before("validate environment", async function(): Promise<void> {
+  before("validate environment", async function (): Promise<void> {
     should.exist(
       env[EnvVarKeys.IOTHUB_CONNECTION_STRING],
       "define IOTHUB_CONNECTION_STRING in your environment before running integration tests."
     );
   });
 
-  afterEach("close the connection", async function(): Promise<void> {
+  afterEach("close the connection", async function (): Promise<void> {
     if (client) {
       debug(">>> After Each, closing the client...");
       await client.close();
     }
   });
 
-  it("should be able to get hub runtime info", async function(): Promise<void> {
+  it("should be able to get hub runtime info", async function (): Promise<void> {
     client = await EventHubClient.createFromIotHubConnectionString(service.connectionString!);
     const runtimeInfo = await client.getProperties();
     debug(">>> RuntimeInfo: ", runtimeInfo);
@@ -40,14 +40,14 @@ describe("EventHub Client with iothub connection string ", function(): void {
     );
   });
 
-  it("should be able to receive messages from the event hub", async function(): Promise<void> {
+  it("should be able to receive messages from the event hub", async function (): Promise<void> {
     client = await EventHubClient.createFromIotHubConnectionString(service.connectionString!);
     const receiver = client.createConsumer(
       EventHubClient.defaultConsumerGroupName,
       "0",
       EventPosition.earliest()
     );
-    const datas = await receiver.receiveBatch(15, 10);
+    const datas = await receiver.receiveEvents(15, 10);
     debug(">>>> Received events from partition %s, %O", "0", datas);
   });
 }).timeout(30000);

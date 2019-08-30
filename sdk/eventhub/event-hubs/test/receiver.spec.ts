@@ -22,7 +22,7 @@ import { EnvVarKeys, getEnvVars } from "./utils/testUtils";
 import { AbortController } from "@azure/abort-controller";
 const env = getEnvVars();
 
-describe("EventHub Receiver #RunnableInBrowser", function(): void {
+describe.only("EventHub Receiver #RunnableInBrowser", function (): void {
   const service = {
     connectionString: env[EnvVarKeys.EVENTHUB_CONNECTION_STRING],
     path: env[EnvVarKeys.EVENTHUB_NAME]
@@ -30,7 +30,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
   const client: EventHubClient = new EventHubClient(service.connectionString, service.path);
   let receiver: EventHubConsumer | undefined;
   let partitionIds: string[];
-  before("validate environment", async function(): Promise<void> {
+  before("validate environment", async function (): Promise<void> {
     should.exist(
       env[EnvVarKeys.EVENTHUB_CONNECTION_STRING],
       "define EVENTHUB_CONNECTION_STRING in your environment before running integration tests."
@@ -42,11 +42,11 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
     partitionIds = await client.getPartitionIds();
   });
 
-  after("close the connection", async function(): Promise<void> {
+  after("close the connection", async function (): Promise<void> {
     await client.close();
   });
 
-  afterEach("close the receiver link", async function(): Promise<void> {
+  afterEach("close the receiver link", async function (): Promise<void> {
     if (receiver && !receiver.isClosed) {
       await receiver.close();
       debug("After each - Receiver closed.");
@@ -54,19 +54,19 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
     receiver = undefined;
   });
 
-  describe("with partitionId 0 as number", function(): void {
-    it("should not throw an error", async function(): Promise<void> {
+  describe("with partitionId 0 as number", function (): void {
+    it("should not throw an error", async function (): Promise<void> {
       receiver = client.createConsumer(
         EventHubClient.defaultConsumerGroupName,
         0 as any,
         EventPosition.fromSequenceNumber(0)
       );
-      await receiver.receiveBatch(10, 20);
+      await receiver.receiveEvents(10, 20);
     });
   });
 
-  describe("with EventPosition specified as", function(): void {
-    it("'from end of stream' should receive messages correctly", async function(): Promise<void> {
+  describe("with EventPosition specified as", function (): void {
+    it("'from end of stream' should receive messages correctly", async function (): Promise<void> {
       const partitionId = partitionIds[0];
       debug("Creating new receiver with offset EndOfStream");
       const receiver = client.createConsumer(
@@ -74,7 +74,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         partitionId,
         EventPosition.latest()
       );
-      const data = await receiver.receiveBatch(10, 10);
+      const data = await receiver.receiveEvents(10, 10);
       data.length.should.equal(0, "Unexpected message received when using EventPosition.fromEnd()");
       const events: EventData[] = [];
       for (let i = 0; i < 10; i++) {
@@ -85,16 +85,16 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       }
       await client.createProducer({ partitionId: partitionId }).send(events);
       debug(">>>>>>> Sent the new messages. We should only receive these messages.");
-      const data2 = await receiver.receiveBatch(10, 20);
+      const data2 = await receiver.receiveEvents(10, 20);
       debug("received messages: ", data2);
       data2.length.should.equal(10, "Failed to receive the expected nummber of messages");
       debug("Next receive on this partition should not receive any messages.");
-      const data3 = await receiver.receiveBatch(10, 10);
+      const data3 = await receiver.receiveEvents(10, 10);
       data3.length.should.equal(0, "Unexpected message received");
       await receiver.close();
     });
 
-    it("'from last enqueued sequence number' should receive messages correctly", async function(): Promise<
+    it("'from last enqueued sequence number' should receive messages correctly", async function (): Promise<
       void
     > {
       const partitionId = partitionIds[0];
@@ -105,7 +105,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         partitionId,
         EventPosition.fromSequenceNumber(partitionInfo.lastEnqueuedSequenceNumber)
       );
-      const data = await receiver.receiveBatch(10, 10);
+      const data = await receiver.receiveEvents(10, 10);
       data.length.should.equal(
         0,
         "Unexpected message received when using EventPosition.fromSequenceNumber()"
@@ -119,13 +119,13 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       }
       await client.createProducer({ partitionId: partitionId }).send(events);
       debug(">>>>>>> Sent 10 messages. We should only receive these 10 messages.");
-      const data2 = await receiver.receiveBatch(10, 20);
+      const data2 = await receiver.receiveEvents(10, 20);
       debug("received messages: ", data2);
       data2.length.should.equal(10, "Failed to receive the expected nummber of messages");
       await receiver.close();
     });
 
-    it("'after a particular offset' should receive messages correctly", async function(): Promise<
+    it("'after a particular offset' should receive messages correctly", async function (): Promise<
       void
     > {
       const partitionId = partitionIds[0];
@@ -149,13 +149,13 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         partitionId,
         EventPosition.fromOffset(pInfo.lastEnqueuedOffset)
       );
-      const data = await receiver.receiveBatch(10, 20);
+      const data = await receiver.receiveEvents(10, 20);
       debug("received messages: ", data);
       data.length.should.equal(1);
       data[0].properties!.stamp.should.equal(uid);
     });
 
-    it("'after a particular offset with isInclusive true' should receive messages correctly", async function(): Promise<
+    it("'after a particular offset with isInclusive true' should receive messages correctly", async function (): Promise<
       void
     > {
       const partitionId = partitionIds[0];
@@ -185,17 +185,17 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         EventPosition.fromOffset(pInfo.lastEnqueuedOffset, true)
       );
       debug("We should receive the last 2 messages.");
-      const data = await receiver.receiveBatch(10, 30);
+      const data = await receiver.receiveEvents(10, 30);
       debug("received messages: ", data);
       data.length.should.equal(2, "Failed to receive the two expected messages");
       data[0].properties!.stamp.should.equal(uid, "First message has unexpected uid");
       data[1].properties!.stamp.should.equal(uid2, "Second message has unexpected uid");
       debug("Next receive on this partition should not receive any messages.");
-      const data2 = await receiver.receiveBatch(10, 10);
+      const data2 = await receiver.receiveEvents(10, 10);
       data2.length.should.equal(0, "Unexpected message received");
     });
 
-    it("'from a particular enqueued time' should receive messages correctly", async function(): Promise<
+    it("'from a particular enqueued time' should receive messages correctly", async function (): Promise<
       void
     > {
       const partitionId = partitionIds[0];
@@ -221,13 +221,13 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         partitionId,
         EventPosition.fromEnqueuedTime(pInfo.lastEnqueuedTimeUtc)
       );
-      const data = await receiver.receiveBatch(10, 20);
+      const data = await receiver.receiveEvents(10, 20);
       debug("received messages: ", data);
       data.length.should.equal(1, "Failed to received the expected single message");
       data[0].properties!.stamp.should.equal(uid);
     });
 
-    it("'after the particular sequence number' should receive messages correctly", async function(): Promise<
+    it("'after the particular sequence number' should receive messages correctly", async function (): Promise<
       void
     > {
       const partitionId = partitionIds[0];
@@ -252,16 +252,16 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         partitionId,
         EventPosition.fromSequenceNumber(pInfo.lastEnqueuedSequenceNumber)
       );
-      const data = await receiver.receiveBatch(10, 20);
+      const data = await receiver.receiveEvents(10, 20);
       debug("received messages: ", data);
       data.length.should.equal(1, "Failed to receive the expected single message");
       data[0].properties!.stamp.should.equal(uid, "Received message has unexpected uid");
       debug("Next receive on this partition should not receive any messages.");
-      const data2 = await receiver.receiveBatch(10, 10);
+      const data2 = await receiver.receiveEvents(10, 10);
       data2.length.should.equal(0, "Unexpected message received");
     });
 
-    it("'after the particular sequence number' with isInclusive true should receive messages correctly", async function(): Promise<
+    it("'after the particular sequence number' with isInclusive true should receive messages correctly", async function (): Promise<
       void
     > {
       const partitionId = partitionIds[0];
@@ -293,19 +293,19 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         EventPosition.fromSequenceNumber(pInfo.lastEnqueuedSequenceNumber, true)
       );
       debug("We should receive the last 2 messages.");
-      const data = await receiver.receiveBatch(10, 30);
+      const data = await receiver.receiveEvents(10, 30);
       debug("received messages: ", data);
       data.length.should.equal(2, "Failed to received two expected messages");
       data[0].properties!.stamp.should.equal(uid, "Message 1 has unexpected uid");
       data[1].properties!.stamp.should.equal(uid2, "Message 2 has unexpected uid");
       debug("Next receive on this partition should not receive any messages.");
-      const data2 = await receiver.receiveBatch(10, 10);
+      const data2 = await receiver.receiveEvents(10, 10);
       data2.length.should.equal(0, "Unexpected message received");
     });
   });
 
-  describe("in streaming mode", function(): void {
-    it("should receive messages correctly", async function(): Promise<void> {
+  describe("in streaming mode", function (): void {
+    it("should receive messages correctly", async function (): Promise<void> {
       const partitionId = partitionIds[0];
       const time = Date.now();
       // send a message that can be received
@@ -325,7 +325,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         let shouldStop = false;
         const events: ReceivedEventData[] = [];
 
-        const handler = receiver!.receive((event) => {
+        const handler = receiver!.receiveWithCallbacks((event) => {
           if (!shouldStop) {
             events.push(event);
             shouldStop = true;
@@ -340,7 +340,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       received.length.should.equal(1);
     });
 
-    it("should support being cancelled", async function(): Promise<void> {
+    it("should support being cancelled", async function (): Promise<void> {
       const partitionId = partitionIds[0];
       const time = Date.now();
       // send a message that can be received
@@ -364,7 +364,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
           // abortSignal event listeners will be triggered after synchronous paths are executed
           const abortSignal = AbortController.timeout(0);
 
-          const handler = receiver!.receive(
+          const handler = receiver!.receiveWithCallbacks(
             (event) => {
               if (!shouldStop) {
                 events.push(event);
@@ -386,7 +386,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       }
     });
 
-    it("should support being cancelled from an already aborted AbortSignal", async function(): Promise<
+    it("should support being cancelled from an already aborted AbortSignal", async function (): Promise<
       void
     > {
       const partitionId = partitionIds[0];
@@ -414,7 +414,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
           const abortController = new AbortController();
           abortController.abort();
 
-          const handler = receiver!.receive(
+          const handler = receiver!.receiveWithCallbacks(
             (event) => {
               if (!shouldStop) {
                 events.push(event);
@@ -436,7 +436,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       }
     });
 
-    it("should not support creating a new handler after cancellation", async function(): Promise<
+    it("should not support creating a new handler after cancellation", async function (): Promise<
       void
     > {
       const partitionId = partitionIds[0];
@@ -464,7 +464,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
           const abortController = new AbortController();
           abortController.abort();
 
-          const handler = receiver!.receive(
+          const handler = receiver!.receiveWithCallbacks(
             (event) => {
               if (!shouldStop) {
                 events.push(event);
@@ -489,7 +489,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
           await new Promise((resolve, reject) => {
             let shouldStop = false;
 
-            const handler = receiver!.receive((event) => {
+            const handler = receiver!.receiveWithCallbacks((event) => {
               if (!shouldStop) {
                 events.push(event);
                 shouldStop = true;
@@ -511,20 +511,20 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
     });
   });
 
-  describe("in batch mode #RunnableInBrowser", function(): void {
-    it("should receive messages correctly", async function(): Promise<void> {
+  describe("in batch mode #RunnableInBrowser", function (): void {
+    it("should receive messages correctly", async function (): Promise<void> {
       const partitionId = partitionIds[0];
       receiver = client.createConsumer(
         EventHubClient.defaultConsumerGroupName,
         partitionId,
         EventPosition.earliest()
       );
-      const data = await receiver.receiveBatch(5, 10);
+      const data = await receiver.receiveEvents(5, 10);
       debug("received messages: ", data);
       data.length.should.equal(5, "Failed to receive five expected messages");
     });
 
-    it("should receive messages correctly with maxRetries 0", async function(): Promise<void> {
+    it("should receive messages correctly with maxRetries 0", async function (): Promise<void> {
       const partitionId = partitionIds[0];
       receiver = client.createConsumer(
         EventHubClient.defaultConsumerGroupName,
@@ -532,12 +532,12 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         EventPosition.earliest(),
         { retryOptions: { maxRetries: 0 } }
       );
-      const data = await receiver.receiveBatch(5, 10);
+      const data = await receiver.receiveEvents(5, 10);
       debug("received messages: ", data);
       data.length.should.equal(5, "Failed to receive five expected messages");
     });
 
-    it("should support being cancelled", async function(): Promise<void> {
+    it("should support being cancelled", async function (): Promise<void> {
       const partitionId = partitionIds[0];
       const time = Date.now();
       // send a message that can be received
@@ -557,7 +557,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       try {
         // abortSignal event listeners will be triggered after synchronous paths are executed
         const abortSignal = AbortController.timeout(0);
-        await receiver.receiveBatch(1, 60, abortSignal);
+        await receiver.receiveEvents(1, 60, abortSignal);
         throw new Error(`Test failure`);
       } catch (err) {
         err.name.should.equal("AbortError");
@@ -565,7 +565,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       }
     });
 
-    it("should support being cancelled from an already aborted AbortSignal", async function(): Promise<
+    it("should support being cancelled from an already aborted AbortSignal", async function (): Promise<
       void
     > {
       const partitionId = partitionIds[0];
@@ -588,7 +588,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         // abortSignal event listeners will be triggered after synchronous paths are executed
         const abortController = new AbortController();
         abortController.abort();
-        await receiver.receiveBatch(1, 60, abortController.signal);
+        await receiver.receiveEvents(1, 60, abortController.signal);
         throw new Error(`Test failure`);
       } catch (err) {
         err.name.should.equal("AbortError");
@@ -596,7 +596,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       }
     });
 
-    it("should support cancellation when a connection already exists", async function(): Promise<
+    it("should support cancellation when a connection already exists", async function (): Promise<
       void
     > {
       const partitionId = partitionIds[0];
@@ -616,11 +616,11 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       );
 
       try {
-        // call receiveBatch once to establish a connection
-        await receiver.receiveBatch(1, 60);
+        // call receiveEvents once to establish a connection
+        await receiver.receiveEvents(1, 60);
         // abortSignal event listeners will be triggered after synchronous paths are executed
         const abortSignal = AbortController.timeout(0);
-        await receiver.receiveBatch(1, 60, abortSignal);
+        await receiver.receiveEvents(1, 60, abortSignal);
         throw new Error(`Test failure`);
       } catch (err) {
         err.name.should.equal("AbortError");
@@ -628,7 +628,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       }
     });
 
-    it("should not support calling receiveBatch after a cancellation", async function(): Promise<
+    it("should not support calling receiveEvents after a cancellation", async function (): Promise<
       void
     > {
       const partitionId = partitionIds[0];
@@ -650,13 +650,13 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       try {
         // abortSignal event listeners will be triggered after synchronous paths are executed
         const abortSignal = AbortController.timeout(0);
-        await receiver.receiveBatch(1, 60, abortSignal);
+        await receiver.receiveEvents(1, 60, abortSignal);
         throw new Error(`Test failure`);
       } catch (err) {
         err.name.should.equal("AbortError");
         err.message.should.equal("The receive operation has been cancelled by the user.");
         try {
-          await receiver.receiveBatch(1, 60);
+          await receiver.receiveEvents(1, 60);
           throw new Error(`Test failure`);
         } catch (err) {
           err.message.should.match(
@@ -667,8 +667,8 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
     });
   });
 
-  describe("getIterator", function(): void {
-    it("should receive messages correctly", async function(): Promise<void> {
+  describe("getIterator", function (): void {
+    it("should receive messages correctly", async function (): Promise<void> {
       const partitionId = partitionIds[0];
 
       const time = Date.now();
@@ -708,7 +708,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       data.length.should.equal(messageCount, `Failed to receive ${messageCount} expected messages`);
     });
 
-    it("should properly drain if broken out of", async function(): Promise<void> {
+    it("should properly drain if broken out of", async function (): Promise<void> {
       const partitionId = partitionIds[0];
 
       receiver = client.createConsumer(
@@ -720,7 +720,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
 
       const eventPromise = eventIterator.next();
 
-      // wait 65 seconds before sending a message to give underlying receiveBatch a chance to return 0 results
+      // wait 65 seconds before sending a message to give underlying receiveEvents a chance to return 0 results
       const raceResult = await Promise.race([
         delay(65000, undefined, undefined, "delay"),
         eventPromise
@@ -762,7 +762,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       });
     });
 
-    it("should not return undefined if no messages are found", async function(): Promise<void> {
+    it("should not return undefined if no messages are found", async function (): Promise<void> {
       const partitionId = partitionIds[0];
 
       receiver = client.createConsumer(
@@ -791,7 +791,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       }
     });
 
-    it("should support being cancelled", async function(): Promise<void> {
+    it("should support being cancelled", async function (): Promise<void> {
       const partitionId = partitionIds[0];
       const time = Date.now();
       // send a message that can be received
@@ -822,7 +822,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       }
     });
 
-    it("should support being cancelled from an already aborted AbortSignal", async function(): Promise<
+    it("should support being cancelled from an already aborted AbortSignal", async function (): Promise<
       void
     > {
       const partitionId = partitionIds[0];
@@ -856,7 +856,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       }
     });
 
-    it("should not support creating a new iterator after a cancellation", async function(): Promise<
+    it("should not support creating a new iterator after a cancellation", async function (): Promise<
       void
     > {
       const partitionId = partitionIds[0];
@@ -900,8 +900,8 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
     });
   });
 
-  describe("mix and match receive methods", function(): void {
-    it("should maintain sequence across calls", function(done: Mocha.Done): void {
+  describe("mix and match receive methods", function (): void {
+    it("should maintain sequence across calls", function (done: Mocha.Done): void {
       // wrap test to allow mixing async/await with done
       (async (done: Mocha.Done) => {
         const partitionId = partitionIds[0];
@@ -939,13 +939,13 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         }
 
         // switch to batcher
-        (await receiver.receiveBatch(5)).forEach((event) => {
+        (await receiver.receiveEvents(5)).forEach((event) => {
           data.push(event);
         });
 
         // switch to handler
         let handlerReceivedCount = 0;
-        const handler = receiver.receive(
+        const handler = receiver.receiveWithCallbacks(
           async (event) => {
             data.push(event);
 
@@ -988,8 +988,8 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
     });
   });
 
-  describe("Errors when calling createConsumer", function(): void {
-    it("should throw an error if EventPosition is missing", function() {
+  describe("Errors when calling createConsumer", function (): void {
+    it("should throw an error if EventPosition is missing", function () {
       try {
         client.createConsumer(EventHubClient.defaultConsumerGroupName, "0", undefined as any);
         throw new Error("Test failure");
@@ -999,7 +999,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       }
     });
 
-    it("should throw an error if consumerGroup is missing", function() {
+    it("should throw an error if consumerGroup is missing", function () {
       try {
         client.createConsumer(undefined as any, "0", EventPosition.earliest());
         throw new Error("Test failure");
@@ -1009,7 +1009,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       }
     });
 
-    it("should throw MessagingEntityNotFoundError fr non existing consumer group", function(done: Mocha.Done): void {
+    it("should throw MessagingEntityNotFoundError fr non existing consumer group", function (done: Mocha.Done): void {
       try {
         debug(">>>>>>>> client created.");
         const onMessage = (data: any) => {
@@ -1026,7 +1026,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
           }, 3000);
         };
         receiver = client.createConsumer("some-random-name", "0", EventPosition.earliest());
-        receiver.receive(onMessage, onError);
+        receiver.receiveWithCallbacks(onMessage, onError);
         debug(">>>>>>>> attached the error handler on the receiver...");
       } catch (err) {
         debug(">>> Some error", err);
@@ -1051,7 +1051,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
   //     debug("partition info: ", pInfo);
   //     debug("Creating new receiver with offset EndOfStream");
   //     receiver = client.createConsumer(partitionId, { eventPosition: EventPosition.fromStart(), enableReceiverRuntimeMetric: true });
-  //     let data = await receiver.receive(1, 10);
+  //     let data = await receiver.receiveWithCallbacks(1, 10);
   //     debug("receiver.runtimeInfo ", receiver.runtimeInfo);
   //     data.length.should.equal(1);
   //     should.exist(receiver.runtimeInfo);
@@ -1063,8 +1063,8 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
   //   });
   // });
 
-  describe("with ownerLevel", function(): void {
-    it("should behave correctly when a receiver with lower ownerLevel value is connected after a receiver with higher ownerLevel value to a partition in a consumer group", function(done: Mocha.Done): void {
+  describe("with ownerLevel", function (): void {
+    it("should behave correctly when a receiver with lower ownerLevel value is connected after a receiver with higher ownerLevel value to a partition in a consumer group", function (done: Mocha.Done): void {
       const partitionId = partitionIds[0];
       let ownerLevelRcvr1: ReceiveHandler;
       let ownerLevelRcvr2: ReceiveHandler;
@@ -1085,7 +1085,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
           ownerLevel: 2
         }
       );
-      ownerLevelRcvr1 = receiver1.receive(onMsg, onError);
+      ownerLevelRcvr1 = receiver1.receiveWithCallbacks(onMsg, onError);
       debug("Created ownerLevel receiver 1 %s", ownerLevelRcvr1);
       setTimeout(() => {
         const onError2 = (error: MessagingError | Error) => {
@@ -1117,12 +1117,12 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
             ownerLevel: 1
           }
         );
-        ownerLevelRcvr2 = receiver2.receive(onMsg2, onError2);
+        ownerLevelRcvr2 = receiver2.receiveWithCallbacks(onMsg2, onError2);
         debug("Created ownerLevel receiver 2 %s", ownerLevelRcvr2);
       }, 3000);
     });
 
-    it("should behave correctly when a receiver with higher ownerLevel value is connected after a receiver with lower ownerLevel value to a partition in a consumer group", function(done: Mocha.Done): void {
+    it("should behave correctly when a receiver with higher ownerLevel value is connected after a receiver with lower ownerLevel value to a partition in a consumer group", function (done: Mocha.Done): void {
       const partitionId = partitionIds[0];
       let ownerLevelRcvr1: ReceiveHandler;
       let ownerLevelRcvr2: ReceiveHandler;
@@ -1156,7 +1156,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
           ownerLevel: 1
         }
       );
-      ownerLevelRcvr1 = receiver1.receive(onMsg, onError);
+      ownerLevelRcvr1 = receiver1.receiveWithCallbacks(onMsg, onError);
       debug("Created ownerLevel receiver 1 %s", ownerLevelRcvr1);
       setTimeout(() => {
         const onError2 = (error: MessagingError | Error) => {
@@ -1176,12 +1176,12 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
             ownerLevel: 2
           }
         );
-        ownerLevelRcvr2 = receiver2.receive(onMsg2, onError2);
+        ownerLevelRcvr2 = receiver2.receiveWithCallbacks(onMsg2, onError2);
         debug("Created ownerLevel receiver 2 %s", ownerLevelRcvr2);
       }, 3000);
     });
 
-    it("should behave correctly when a non ownerLevel receiver is created after an ownerLevel receiver", function(done: Mocha.Done): void {
+    it("should behave correctly when a non ownerLevel receiver is created after an ownerLevel receiver", function (done: Mocha.Done): void {
       const partitionId = partitionIds[0];
       let ownerLevelRcvr: ReceiveHandler;
       let nonownerLevelRcvr: ReceiveHandler;
@@ -1202,7 +1202,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
           ownerLevel: 1
         }
       );
-      ownerLevelRcvr = receiver1.receive(onmsg1, onerr1);
+      ownerLevelRcvr = receiver1.receiveWithCallbacks(onmsg1, onerr1);
       debug("Created ownerLevel receiver %s", ownerLevelRcvr);
       const onerr2 = (error: MessagingError | Error) => {
         debug(">>>> non ownerLevel Receiver", error);
@@ -1230,11 +1230,11 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         partitionId,
         EventPosition.latest()
       );
-      nonownerLevelRcvr = receiver2.receive(onmsg2, onerr2);
+      nonownerLevelRcvr = receiver2.receiveWithCallbacks(onmsg2, onerr2);
       debug("Created non ownerLevel receiver %s", nonownerLevelRcvr);
     });
 
-    it("should behave correctly when an ownerLevel receiver is created after a non ownerLevel receiver", function(done: Mocha.Done): void {
+    it("should behave correctly when an ownerLevel receiver is created after a non ownerLevel receiver", function (done: Mocha.Done): void {
       const partitionId = partitionIds[0];
       let ownerLevelRcvr: ReceiveHandler;
       let nonownerLevelRcvr: ReceiveHandler;
@@ -1266,7 +1266,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         partitionId,
         EventPosition.latest()
       );
-      nonownerLevelRcvr = receiver1.receive(onmsg3, onerr3);
+      nonownerLevelRcvr = receiver1.receiveWithCallbacks(onmsg3, onerr3);
       debug("Created non ownerLevel receiver %s", nonownerLevelRcvr);
       setTimeout(() => {
         const onerr4 = (error: MessagingError | Error) => {
@@ -1286,22 +1286,22 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
             ownerLevel: 1
           }
         );
-        ownerLevelRcvr = receiver2.receive(onmsg4, onerr4);
+        ownerLevelRcvr = receiver2.receiveWithCallbacks(onmsg4, onerr4);
         debug("Created ownerLevel receiver %s", ownerLevelRcvr);
       }, 3000);
     });
   });
 
-  describe("Negative scenarios", function(): void {
-    describe("on invalid partition ids like", function(): void {
+  describe("Negative scenarios", function (): void {
+    describe("on invalid partition ids like", function (): void {
       const invalidIds = ["XYZ", "-1", "1000", "-"];
-      invalidIds.forEach(function(id: string): void {
-        it(`"${id}" should throw an error`, async function(): Promise<void> {
+      invalidIds.forEach(function (id: string): void {
+        it(`"${id}" should throw an error`, async function (): Promise<void> {
           try {
             debug("Created receiver and will be receiving messages from partition id ...", id);
             const d = await client
               .createConsumer(EventHubClient.defaultConsumerGroupName, id, EventPosition.latest())
-              .receiveBatch(10, 3);
+              .receiveEvents(10, 3);
             debug("received messages ", d.length);
             throw new Error("Test failure");
           } catch (err) {
@@ -1314,13 +1314,13 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         });
       });
 
-      it(`" " should throw an invalid EventHub address error`, async function(): Promise<void> {
+      it(`" " should throw an invalid EventHub address error`, async function (): Promise<void> {
         try {
           const id = " ";
           debug("Created receiver and will be receiving messages from partition id ...", id);
           const d = await client
             .createConsumer(EventHubClient.defaultConsumerGroupName, id, EventPosition.latest())
-            .receiveBatch(10, 3);
+            .receiveEvents(10, 3);
           debug("received messages ", d.length);
           throw new Error("Test failure");
         } catch (err) {
@@ -1333,12 +1333,12 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       });
 
       const invalidIds2 = [""];
-      invalidIds2.forEach(function(id: string): void {
-        it(`"${id}" should throw an error`, async function(): Promise<void> {
+      invalidIds2.forEach(function (id: string): void {
+        it(`"${id}" should throw an error`, async function (): Promise<void> {
           try {
             await client
               .createConsumer(EventHubClient.defaultConsumerGroupName, id, EventPosition.latest())
-              .receiveBatch(10, 3);
+              .receiveEvents(10, 3);
             throw new Error("Test failure");
           } catch (err) {
             debug(`>>>> Received error - `, err);
@@ -1348,7 +1348,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
       });
     });
 
-    it("should receive 'QuotaExceededError' when attempting to connect more than 5 receivers to a partition in a consumer group", function(done: Mocha.Done): void {
+    it("should receive 'QuotaExceededError' when attempting to connect more than 5 receivers to a partition in a consumer group", function (done: Mocha.Done): void {
       const partitionId = partitionIds[0];
       const rcvHndlrs: ReceiveHandler[] = [];
       const rcvrs: any[] = [];
@@ -1375,7 +1375,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         };
         const rcvHndlr = client
           .createConsumer(EventHubClient.defaultConsumerGroupName, partitionId, eventPosition)
-          .receive(onMsg, onError);
+          .receiveWithCallbacks(onMsg, onError);
         rcvHndlrs.push(rcvHndlr);
       }
       debug(">>> Attached message handlers to each receiver.");
@@ -1407,7 +1407,7 @@ describe("EventHub Receiver #RunnableInBrowser", function(): void {
         };
         const failedRcvHandler = client
           .createConsumer(EventHubClient.defaultConsumerGroupName, partitionId, eventPosition)
-          .receive(onmsg2, onerr2);
+          .receiveWithCallbacks(onmsg2, onerr2);
         rcvHndlrs.push(failedRcvHandler);
       }, 5000);
     });

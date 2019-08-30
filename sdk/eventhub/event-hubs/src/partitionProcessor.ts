@@ -52,7 +52,9 @@ export class PartitionProcessor {
    * @param events The received events to be processed.
    * @return {Promise<void>}
    */
-  async processEvents(events: ReceivedEventData[]): Promise<void> { }
+  async processEvents(events: ReceivedEventData[]): Promise<void> {
+    console.log(JSON.stringify(events));
+  }
 
   /**
    * This method is called when an error occurs while receiving events from Event Hubs.
