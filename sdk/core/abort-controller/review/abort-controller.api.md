@@ -23,8 +23,9 @@ export class AbortSignal implements AbortSignalLike {
     constructor();
     readonly aborted: boolean;
     addEventListener(_type: "abort", listener: (this: AbortSignalLike, ev: any) => any): void;
+    dispatchEvent(_event: Event): boolean;
     static readonly none: AbortSignal;
-    onabort?: (ev?: Event) => any;
+    onabort: ((ev?: Event) => any) | null;
     removeEventListener(_type: "abort", listener: (this: AbortSignalLike, ev: any) => any): void;
 }
 

@@ -1,100 +1,100 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-export const associatedLinkName = "associated-link-name";
-export const partitionKey = "x-opt-partition-key";
-export const sequenceNumber = "x-opt-sequence-number";
-export const enqueueSequenceNumber = "x-opt-enqueue-sequence-number";
-export const enqueuedTime = "x-opt-enqueued-time";
-export const scheduledEnqueueTime = "x-opt-scheduled-enqueue-time";
-export const offset = "x-opt-offset";
-export const lockedUntil = "x-opt-locked-until";
-export const partitionIdName = "x-opt-partition-id";
-export const publisher = "x-opt-publisher-name";
-export const viaPartitionKey = "x-opt-via-partition-key";
-export const deadLetterSource = "x-opt-deadletter-source";
-export const enqueuedTimeAnnotation = `amqp.annotation.${enqueuedTime}`;
-export const offsetAnnotation = `amqp.annotation.${offset}`;
-export const sequenceNumberAnnotation = `amqp.annotation.${sequenceNumber}`;
-export const guidSize = 16;
-export const message = "message";
-export const error = "error";
-export const statusCode = "status-code";
-export const statusDescription = "status-description";
-export const errorCondition = "error-condition";
-export const management = "$management";
-export const partition = "partition";
-export const partitionId = "partitionId";
-export const readOperation = "READ";
-export const TLS = "tls";
-export const establishConnection = "establishConnection";
-export const defaultConsumerGroup = "$default";
-export const eventHub = "eventhub";
-export const cbsEndpoint = "$cbs";
-export const cbsReplyTo = "cbs";
-export const operationPutToken = "put-token";
-export const aadEventHubsAudience = "https://eventhubs.azure.net/";
-export const aadEventHubsScope = "https://eventhubs.azure.net//.default";
-export const aadServiceBusAudience = "https://servicebus.azure.net/";
-export const aadServiceBusScope = "https://servicebus.azure.net//.default";
-export const maxUserAgentLength = 512;
-export const vendorString = "com.microsoft";
-export const attachEpoch = `${vendorString}:epoch`;
-export const receiverIdentifierName = `${vendorString}:receiver-name`;
-export const enableReceiverRuntimeMetricName = `${vendorString}:enable-receiver-runtime-metric`;
-export const timespan = `${vendorString}:timespan`;
-export const uri = `${vendorString}:uri`;
-export const dateTimeOffset = `${vendorString}:datetime-offset`;
-export const sessionFilterName = `${vendorString}:session-filter`;
-export const receiverError = "receiver_error";
-export const senderError = "sender_error";
-export const sessionError = "session_error";
-export const connectionError = "connection_error";
-export const defaultOperationTimeoutInMs = 60000;
-export const defaultConnectionIdleTimeoutInMs = 60000;
-export const managementRequestKey = "managementRequest";
-export const negotiateCbsKey = "negotiateCbs";
-export const negotiateClaim = "negotiateClaim";
-export const ensureContainerAndBlob = "ensureContainerAndBlob";
-export const defaultPrefetchCount = 1000;
-export const reconnectLimit = 100;
-export const maxMessageIdLength = 128;
-export const maxPartitionKeyLength = 128;
-export const maxSessionIdLength = 128;
-export const pathDelimiter = "/";
-export const ruleNameMaximumLength = 50;
-export const maximumSqlFilterStatementLength = 1024;
-export const maximumSqlRuleActionStatementLength = 1024;
-export const maxDeadLetterReasonLength = 4096;
+const associatedLinkName = "associated-link-name";
+const partitionKey = "x-opt-partition-key";
+const sequenceNumber = "x-opt-sequence-number";
+const enqueueSequenceNumber = "x-opt-enqueue-sequence-number";
+const enqueuedTime = "x-opt-enqueued-time";
+const scheduledEnqueueTime = "x-opt-scheduled-enqueue-time";
+const offset = "x-opt-offset";
+const lockedUntil = "x-opt-locked-until";
+const partitionIdName = "x-opt-partition-id";
+const publisher = "x-opt-publisher-name";
+const viaPartitionKey = "x-opt-via-partition-key";
+const deadLetterSource = "x-opt-deadletter-source";
+const enqueuedTimeAnnotation = `amqp.annotation.${enqueuedTime}`;
+const offsetAnnotation = `amqp.annotation.${offset}`;
+const sequenceNumberAnnotation = `amqp.annotation.${sequenceNumber}`;
+const guidSize = 16;
+const message = "message";
+const error = "error";
+const statusCode = "status-code";
+const statusDescription = "status-description";
+const errorCondition = "error-condition";
+const management = "$management";
+const partition = "partition";
+const partitionId = "partitionId";
+const readOperation = "READ";
+const TLS = "tls";
+const establishConnection = "establishConnection";
+const defaultConsumerGroup = "$default";
+const eventHub = "eventhub";
+const cbsEndpoint = "$cbs";
+const cbsReplyTo = "cbs";
+const operationPutToken = "put-token";
+const aadEventHubsAudience = "https://eventhubs.azure.net/";
+const aadEventHubsScope = "https://eventhubs.azure.net//.default";
+const aadServiceBusAudience = "https://servicebus.azure.net/";
+const aadServiceBusScope = "https://servicebus.azure.net//.default";
+const maxUserAgentLength = 512;
+const vendorString = "com.microsoft";
+const attachEpoch = `${vendorString}:epoch`;
+const receiverIdentifierName = `${vendorString}:receiver-name`;
+const enableReceiverRuntimeMetricName = `${vendorString}:enable-receiver-runtime-metric`;
+const timespan = `${vendorString}:timespan`;
+const uri = `${vendorString}:uri`;
+const dateTimeOffset = `${vendorString}:datetime-offset`;
+const sessionFilterName = `${vendorString}:session-filter`;
+const receiverError = "receiver_error";
+const senderError = "sender_error";
+const sessionError = "session_error";
+const connectionError = "connection_error";
+const defaultOperationTimeoutInMs = 60000;
+const defaultConnectionIdleTimeoutInMs = 60000;
+const managementRequestKey = "managementRequest";
+const negotiateCbsKey = "negotiateCbs";
+const negotiateClaim = "negotiateClaim";
+const ensureContainerAndBlob = "ensureContainerAndBlob";
+const defaultPrefetchCount = 1000;
+const reconnectLimit = 100;
+const maxMessageIdLength = 128;
+const maxPartitionKeyLength = 128;
+const maxSessionIdLength = 128;
+const pathDelimiter = "/";
+const ruleNameMaximumLength = 50;
+const maximumSqlFilterStatementLength = 1024;
+const maximumSqlRuleActionStatementLength = 1024;
+const maxDeadLetterReasonLength = 4096;
 // https://stackoverflow.com/questions/11526504/minimum-and-maximum-date for js
 // However we are setting this to the TimeSpan.MaxValue of C#.
-export const maxDurationValue = 922337203685477;
-export const minDurationValue = -922337203685477;
+const maxDurationValue = 922337203685477;
+const minDurationValue = -922337203685477;
 // https://github.com/Azure/azure-amqp/blob/master/Microsoft.Azure.Amqp/Amqp/AmqpConstants.cs#L47
-export const maxAbsoluteExpiryTime = new Date("9999-12-31T07:59:59.000Z").getTime();
-export const aadTokenValidityMarginInMs = 5000;
-export const connectionReconnectDelay = 300;
-export const defaultMaxRetries = 3;
-export const defaultMaxRetriesForConnection = 150;
-export const defaultDelayBetweenOperationRetriesInMs = 30000;
-export const defaultMaxDelayForExponentialRetryInMs = 90000;
-export const receiverSettleMode = "receiver-settle-mode";
-export const dispositionStatus = "disposition-status";
-export const fromSequenceNumber = "from-sequence-number";
-export const messageCount = "message-count";
-export const lockTokens = "lock-tokens";
-export const messageIdMapKey = "message-id";
-export const sequenceNumberMapKey = "sequence-number";
-export const lockTokenMapKey = "lock-token";
-export const sessionIdMapKey = "session-id";
-export const sequenceNumbers = "sequence-numbers";
-export const deadLetterReason = "deadletter-reason";
-export const deadLetterDescription = "deadletter-description";
-export const propertiesToModify = "properties-to-modify";
-export const deadLetterName = "com.microsoft:dead-letter";
-export const trackingId = "com.microsoft:tracking-id";
-export const serverTimeout = "com.microsoft:server-timeout";
-export const operations = {
+const maxAbsoluteExpiryTime = new Date("9999-12-31T07:59:59.000Z").getTime();
+const aadTokenValidityMarginInMs = 5000;
+const connectionReconnectDelay = 300;
+const defaultMaxRetries = 3;
+const defaultMaxRetriesForConnection = 150;
+const defaultDelayBetweenOperationRetriesInMs = 30000;
+const defaultMaxDelayForExponentialRetryInMs = 90000;
+const receiverSettleMode = "receiver-settle-mode";
+const dispositionStatus = "disposition-status";
+const fromSequenceNumber = "from-sequence-number";
+const messageCount = "message-count";
+const lockTokens = "lock-tokens";
+const messageIdMapKey = "message-id";
+const sequenceNumberMapKey = "sequence-number";
+const lockTokenMapKey = "lock-token";
+const sessionIdMapKey = "session-id";
+const sequenceNumbers = "sequence-numbers";
+const deadLetterReason = "deadletter-reason";
+const deadLetterDescription = "deadletter-description";
+const propertiesToModify = "properties-to-modify";
+const deadLetterName = "com.microsoft:dead-letter";
+const trackingId = "com.microsoft:tracking-id";
+const serverTimeout = "com.microsoft:server-timeout";
+const operations = {
   putToken: "put-token",
   read: "READ",
   cancelScheduledMessage: "com.microsoft:cancel-scheduled-message",
@@ -111,11 +111,109 @@ export const operations = {
   removeRule: "com.microsoft:remove-rule",
   enumerateRules: "com.microsoft:enumerate-rules"
 };
-export const descriptorCodes = {
+const descriptorCodes = {
   ruleDescriptionList: 1335734829060,
   sqlFilterList: 83483426822,
   correlationFilterList: 83483426825,
   sqlRuleActionList: 1335734829062,
   trueFilterList: 83483426823,
   falseFilterList: 83483426824
+};
+
+export const Constants = {
+  associatedLinkName: associatedLinkName as typeof associatedLinkName,
+  partitionKey: partitionKey as typeof partitionKey,
+  sequenceNumber: sequenceNumber as typeof sequenceNumber,
+  enqueueSequenceNumber: enqueueSequenceNumber as typeof enqueueSequenceNumber,
+  enqueuedTime: enqueuedTime as typeof enqueuedTime,
+  scheduledEnqueueTime: scheduledEnqueueTime as typeof scheduledEnqueueTime,
+  offset: offset as typeof offset,
+  lockedUntil: lockedUntil as typeof lockedUntil,
+  partitionIdName: partitionIdName as typeof partitionIdName,
+  publisher: publisher as typeof publisher,
+  viaPartitionKey: viaPartitionKey as typeof viaPartitionKey,
+  deadLetterSource: deadLetterSource as typeof deadLetterSource,
+  enqueuedTimeAnnotation: enqueuedTimeAnnotation as typeof enqueuedTimeAnnotation,
+  offsetAnnotation: offsetAnnotation as typeof offsetAnnotation,
+  sequenceNumberAnnotation: sequenceNumberAnnotation as typeof sequenceNumberAnnotation,
+  guidSize: guidSize as typeof guidSize,
+  message: message as typeof message,
+  error: error as typeof error,
+  statusCode: statusCode as typeof statusCode,
+  statusDescription: statusDescription as typeof statusDescription,
+  errorCondition: errorCondition as typeof errorCondition,
+  management: management as typeof management,
+  partition: partition as typeof partition,
+  partitionId: partitionId as typeof partitionId,
+  readOperation: readOperation as typeof readOperation,
+  TLS: TLS as typeof TLS,
+  establishConnection: establishConnection as typeof establishConnection,
+  defaultConsumerGroup: defaultConsumerGroup as typeof defaultConsumerGroup,
+  eventHub: eventHub as typeof eventHub,
+  cbsEndpoint: cbsEndpoint as typeof cbsEndpoint,
+  cbsReplyTo: cbsReplyTo as typeof cbsReplyTo,
+  operationPutToken: operationPutToken as typeof operationPutToken,
+  aadEventHubsAudience: aadEventHubsAudience as typeof aadEventHubsAudience,
+  aadEventHubsScope: aadEventHubsScope as typeof aadEventHubsScope,
+  aadServiceBusAudience: aadServiceBusAudience as typeof aadServiceBusAudience,
+  aadServiceBusScope: aadServiceBusScope as typeof aadServiceBusScope,
+  maxUserAgentLength: maxUserAgentLength as typeof maxUserAgentLength,
+  vendorString: vendorString as typeof vendorString,
+  attachEpoch: attachEpoch as typeof attachEpoch,
+  receiverIdentifierName: receiverIdentifierName as typeof receiverIdentifierName,
+  enableReceiverRuntimeMetricName: enableReceiverRuntimeMetricName as typeof enableReceiverRuntimeMetricName,
+  timespan: timespan as typeof timespan,
+  uri: uri as typeof uri,
+  dateTimeOffset: dateTimeOffset as typeof dateTimeOffset,
+  sessionFilterName: sessionFilterName as typeof sessionFilterName,
+  receiverError: receiverError as typeof receiverError,
+  senderError: senderError as typeof senderError,
+  sessionError: sessionError as typeof sessionError,
+  connectionError: connectionError as typeof connectionError,
+  defaultOperationTimeoutInMs: defaultOperationTimeoutInMs as typeof defaultOperationTimeoutInMs,
+  defaultConnectionIdleTimeoutInMs: defaultConnectionIdleTimeoutInMs as typeof defaultConnectionIdleTimeoutInMs,
+  managementRequestKey: managementRequestKey as typeof managementRequestKey,
+  negotiateCbsKey: negotiateCbsKey as typeof negotiateCbsKey,
+  negotiateClaim: negotiateClaim as typeof negotiateClaim,
+  ensureContainerAndBlob: ensureContainerAndBlob as typeof ensureContainerAndBlob,
+  defaultPrefetchCount: defaultPrefetchCount as typeof defaultPrefetchCount,
+  reconnectLimit: reconnectLimit as typeof reconnectLimit,
+  maxMessageIdLength: maxMessageIdLength as typeof maxMessageIdLength,
+  maxPartitionKeyLength: maxPartitionKeyLength as typeof maxPartitionKeyLength,
+  maxSessionIdLength: maxSessionIdLength as typeof maxSessionIdLength,
+  pathDelimiter: pathDelimiter as typeof pathDelimiter,
+  ruleNameMaximumLength: ruleNameMaximumLength as typeof ruleNameMaximumLength,
+  maximumSqlFilterStatementLength: maximumSqlFilterStatementLength as typeof maximumSqlFilterStatementLength,
+  maximumSqlRuleActionStatementLength: maximumSqlRuleActionStatementLength as typeof maximumSqlRuleActionStatementLength,
+  maxDeadLetterReasonLength: maxDeadLetterReasonLength as typeof maxDeadLetterReasonLength,
+  // https://stackoverflow.com/questions/11526504/minimum-and-maximum-date for js
+  // However we are setting this to the TimeSpan.MaxValue of C#.
+  maxDurationValue: maxDurationValue as typeof maxDurationValue,
+  minDurationValue: minDurationValue as typeof minDurationValue,
+  // https://github.com/Azure/azure-amqp/blob/master/Microsoft.Azure.Amqp/Amqp/AmqpConstants.cs#L47
+  maxAbsoluteExpiryTime: maxAbsoluteExpiryTime as typeof maxAbsoluteExpiryTime,
+  aadTokenValidityMarginInMs: aadTokenValidityMarginInMs as typeof aadTokenValidityMarginInMs,
+  connectionReconnectDelay: connectionReconnectDelay as typeof connectionReconnectDelay,
+  defaultMaxRetries: defaultMaxRetries as typeof defaultMaxRetries,
+  defaultMaxRetriesForConnection: defaultMaxRetriesForConnection as typeof defaultMaxRetriesForConnection,
+  defaultDelayBetweenOperationRetriesInMs: defaultDelayBetweenOperationRetriesInMs as typeof defaultDelayBetweenOperationRetriesInMs,
+  defaultMaxDelayForExponentialRetryInMs: defaultMaxDelayForExponentialRetryInMs as typeof defaultMaxDelayForExponentialRetryInMs,
+  receiverSettleMode: receiverSettleMode as typeof receiverSettleMode,
+  dispositionStatus: dispositionStatus as typeof dispositionStatus,
+  fromSequenceNumber: fromSequenceNumber as typeof fromSequenceNumber,
+  messageCount: messageCount as typeof messageCount,
+  lockTokens: lockTokens as typeof lockTokens,
+  messageIdMapKey: messageIdMapKey as typeof messageIdMapKey,
+  sequenceNumberMapKey: sequenceNumberMapKey as typeof sequenceNumberMapKey,
+  lockTokenMapKey: lockTokenMapKey as typeof lockTokenMapKey,
+  sessionIdMapKey: sessionIdMapKey as typeof sessionIdMapKey,
+  sequenceNumbers: sequenceNumbers as typeof sequenceNumbers,
+  deadLetterReason: deadLetterReason as typeof deadLetterReason,
+  deadLetterDescription: deadLetterDescription as typeof deadLetterDescription,
+  propertiesToModify: propertiesToModify as typeof propertiesToModify,
+  deadLetterName: deadLetterName as typeof deadLetterName,
+  trackingId: trackingId as typeof trackingId,
+  serverTimeout: serverTimeout as typeof serverTimeout,
+  operations,
+  descriptorCodes
 };

@@ -16,8 +16,7 @@ export { EventHubConnectionConfig } from "./connectionConfig/eventhubConnectionC
 export { IotHubConnectionConfig } from "./connectionConfig/iothubConnectionConfig";
 
 export { CbsClient, CbsResponse } from "./cbs";
-import * as Constants from "./util/constants";
-export { Constants };
+export { Constants } from "./util/constants";
 export { MessageHeader } from "./messageHeader";
 export { MessageProperties } from "./messageProperties";
 export {

@@ -2,7 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/api-extractor.schema.json",
   "mainEntryPointFilePath": "./dist-esm/index.d.ts",
   "docModel": {
-    "enabled": false
+    "enabled": true,
+    "apiJsonFilePath": "../../../doc-models/<unscopedPackageName>.api.json"
   },
   "apiReport": {
     "enabled": true,
