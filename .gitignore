@@ -152,3 +152,4 @@ swagger/*.json
 sdk/keyvault/*/src/**/*.js
 doc-models
 doc-output
+docfx_project
