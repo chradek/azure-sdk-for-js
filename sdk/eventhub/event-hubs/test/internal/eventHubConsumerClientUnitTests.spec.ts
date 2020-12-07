@@ -4,6 +4,7 @@ import {
 CheckpointStore,
 SubscriptionEventHandlers
 } from "../../src";
+import { EnvVarKeys, getEnvVars } from "../public/utils/testUtils";
 import { EventHubConsumerClient, isCheckpointStore } from "../../src/eventHubConsumerClient";
 import { InMemoryCheckpointStore } from "../../src/inMemoryCheckpointStore";
 import { EventProcessor, FullEventProcessorOptions } from "../../src/eventProcessor";
@@ -15,8 +16,12 @@ import chai from "chai";
 
 
 const should = chai.should();
-
+const env = getEnvVars();
 describe("unit tests", () => {
+  const service = {
+    connectionString: env[EnvVarKeys.EVENTHUB_CONNECTION_STRING],
+    path: env[EnvVarKeys.EVENTHUB_NAME]
+  };
     it("isCheckpointStore", () => {
       isCheckpointStore({
         processEvents: async () => {},
