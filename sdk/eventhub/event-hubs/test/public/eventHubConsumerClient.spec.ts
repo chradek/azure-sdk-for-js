@@ -527,7 +527,6 @@ describe("EventHubConsumerClient", () => {
           service.path
           // specifying your own checkpoint store activates the "production ready" code path that
           // also uses the BalancedLoadBalancingStrategy
-
         )
       );
 
