@@ -57,6 +57,13 @@
     "./es/src/defaultHttpClient.js": "./es/src/defaultHttpClient.browser.js",
     "./es/src/util/inspect.js": "./es/src/util/inspect.browser.js"
   },
+  "react-native": {
+    "./dist/index.js": "./es/src/coreHttp.js",
+    "./es/src/util/xml.browser.js": "./es/src/util/xml.react-native.js",
+    "./es/src/util/xml.js": "./es/src/util/xml.react-native.js",
+    "./es/src/policies/msRestUserAgentPolicy.js": "./es/src/policies/msRestUserAgentPolicy.react-native.js",
+    "./es/src/policies/msRestUserAgentPolicy.browser.js": "./es/src/policies/msRestUserAgentPolicy.react-native.js"
+  },
   "license": "MIT",
   "homepage": "https://github.com/Azure/azure-sdk-for-js/blob/master/sdk/core/core-http/README.md",
   "repository": "github:Azure/azure-sdk-for-js",
@@ -141,7 +148,8 @@
     "tslib": "^2.0.0",
     "tunnel": "^0.0.6",
     "uuid": "^8.3.0",
-    "xml2js": "^0.4.19"
+    "xml2js": "^0.4.19",
+    "xmldom": "^0.4.0"
   },
   "devDependencies": {
     "@azure/eslint-plugin-azure-sdk": "^3.0.0",

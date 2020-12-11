@@ -31,6 +31,9 @@
   "browser": {
     "./dist-esm/src/util/runtimeInfo.js": "./dist-esm/src/util/runtimeInfo.browser.js"
   },
+  "react-native": {
+    "./dist/index.js": "./dist-esm/src/index.js"
+  },
   "engine": {
     "node": ">=8.0.0"
   },
