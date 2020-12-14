@@ -1265,4 +1265,4 @@ describe("EventHubConsumerClient", () => {
       should.equal((caughtErr as MessagingError).code, "ArgumentOutOfRangeError");
     });
   });
-});
+}).timeout(120000);
