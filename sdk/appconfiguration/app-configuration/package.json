@@ -29,7 +29,8 @@
   "react-native": {
     "./dist/index.js": "./dist-esm/src/index.js",
     "./dist-esm/src/internal/cryptoHelpers.js": "./dist-esm/src/internal/cryptoHelpers.react-native.js",
-    "./dist-esm/src/internal/cryptoHelpers.browser.js": "./dist-esm/src/internal/cryptoHelpers.react-native.js"
+    "./dist-esm/src/internal/cryptoHelpers.browser.js": "./dist-esm/src/internal/cryptoHelpers.react-native.js",
+    "buffer": "buffer"
   },
   "files": [
     "dist/**/*.js",
@@ -90,6 +91,7 @@
     "@azure/core-paging": "^1.1.1",
     "@azure/core-tracing": "1.0.0-preview.9",
     "@opentelemetry/api": "^0.10.2",
+    "buffer": "^5.2.1",
     "isomorphic-webcrypto": "2.3.6",
     "tslib": "^2.0.0"
   },
